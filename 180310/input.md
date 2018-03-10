@@ -1,5 +1,17 @@
 # デーモンよもやま話
 
+## はじめに
+
+- [daemon(7)](https://www.freedesktop.org/software/systemd/man/daemon.html) を頑張って解説します
+
+- 完全に理解してる人は説明要らないと思うし、むしろ解説してほしい
+
+## はじめに
+
+- 内容への質問はいつでもどうぞ
+
+- 内容外の質問は最後にお願いします
+
 ## デーモンとは何か
 
 突然ですが「デーモン」って説明できますか?
@@ -63,11 +75,16 @@ initはPID(プロセス)が1のプロセスである
 
 ## PID = 1
 
-じゃあ、こういうのもありですね!!!
+じゃあ、こういうのもありですね!!![^emergency]
 
-```/boot/grub.cfg
-linux [...] init=/bin/bash
 ```
+$ grep "\slinux\s" /boot/grub/grub.cfg
+...
+linux [...] init=/bin/bash
+...
+```
+
+[^emergency]: http://www.atmarkit.co.jp/ait/articles/0809/30/news148.html
 
 ## `init`とは
 
@@ -84,6 +101,7 @@ linux [...] init=/bin/bash
 ## ブートストラップ
 
 ジーニアス和英大辞典
+
     bootstrap [名]
     1. (長靴の口の後ろにある)つまみ皮.
 
@@ -98,11 +116,17 @@ linux [...] init=/bin/bash
 
 [^weekly_recipe_0348]: http://gihyo.jp/admin/serial/01/ubuntu-recipe/0384gg
 
-## ざっくり版Linuxの起動(続き)
+## ざっくり版`Linux`の起動(続き)
 5. 各種カーネルモジュール(デバイスドライバ)をロードする
 1. 本物のルートファイルシステムに移動する[^weekly_recipe_0348]
 1. カーネルがinitを起動させる
 1. あとはよしなに
+
+## `init`とは
+
+### カーネルから直接起動させるプロセスである
+
+だから、PIDが1になる(と思っておけば良い)
 
 ## `init`とは
 
@@ -164,7 +188,8 @@ UNIXでは「既存プロセスの環境をまるごとコピーする」とい�
 システムの設定ファイルとして2つのシェルスクリプトが使われる
 
 - `/etc/rc`
-- `/etc/rc.local`(システム起動時は`/etc/rc`にキックされる)
+- `/etc/rc.local`
+    - システム起動時は`/etc/rc`にキックされる
 
 ## `BSD init`の場合
 
@@ -197,18 +222,54 @@ BSD initより柔軟
 
 - ランレベルも簡単に使えるしね!
 
-## `System V init`でデーモンを起動
+## `systemd`の場合
+
+「SysV initはそりゃ、BSD initよりは柔軟だけど……
+
+ブート時にすべて、一律にやる必要があるのか?」
+
+→もう少し柔軟性・速度がほしい
+
+## `systemd`の場合
+
+終了ってどうすんの?
+
+→各プログラムに任せる
+
+そもそも、initの仕事でなかったりする
+
+## `systemd`の場合
+
+デーモンの終了も面倒を見てくれる[^systemd_for_admin_2]
+
+- SysV initの場合、デーモンの子プロセスのkillはデーモン側の仕事
+    - 行儀の悪いデーモンは子プロセスを残す
+    - SysV initはどれがどの子かがわからない
+- cgroupを使う
+
+[^systemd_for_admin_2]: http://popopopoon.hatenadiary.jp/entry/2017/11/19/005612
+
+## `init`とは
+
+### 各種プログラムやデーモンを起動させる
+
+- systemdは終了も面倒をみるよ
+- systemdは起動のさせ方も柔軟だよ
+
+## デーモンづくり
+
+## `System V init`でデーモン
 元ネタはsystemd man pageのdaemon[^man_daemon]
 
 [^man_daemon]: https://www.freedesktop.org/software/systemd/man/daemon.html
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 
 ### `stdin` `stdout` `stderr`を除くすべてのファイル記述子を閉じる
 
 これにより、想定外のファイル記述子がデーモンプロセスにとどまってしまうのを防ぐ
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 
 ### シグナルハンドラ―をすべてデフォルトに戻す
 
@@ -223,85 +284,78 @@ BSD initより柔軟
 [^signals]: https://linuxjm.osdn.jp/html/LDP_man-pages/man7/signal.7.html
 [^signal_handler]: https://codezine.jp/article/detail/4700
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### シグナルマスクのリセット
 
 シグナルはブロックすることができる
 
 シグナルマスクとはブロックしているシグナルの集合を示すもの
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### 動的環境のクリーンアップ
 
 デーモンの実行に悪影響を及ぼしそうなものを除外する
 
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### `fork()`システムコール
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### 子プロセス内で`setid()`システムコール
 
 すべての制御端末からプロセスを切り離し、独立したセッションを作成する[^setsid]
 
 [^setsid]: https://linuxjm.osdn.jp/html/LDP_man-pages/man2/setsid.2.html 「呼び出したプロセスは、 新しいプロセスグループと新しいセッションの唯一のプロセスとなる。 新しいセッションは制御端末を持たない。」
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### 子プロセス内で2回目の`fork()`システムコール
 
 デーモンは完全に制御端末を獲得することができなくなる
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### 最初の子プロセスで`exit()`システムコール
 
 - 呼び出し元からみて子プロセスが死に、孫プロセスはみなしごになる
 - 親を失った孫プロセスはinitを親にする
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### `stdin` `stdout` `stderr` を `/dev/null` に接続
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### `umask`を0に設定
 
 `open()`や`mkdir()`といった呼び出しへ`umask`が影響を及ぼさないようにする
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### `cd /`を実行
 
 ディレクトリが使用中にならないようにする
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### PIDファイルの作成
 
 デーモンの二重起動を防止させる
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### 適切なレベルまで特権を降格
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### 起動完了を呼び出し元プロセスに通知
 
 この通知は最初の`fork()`より前につくられている
 
 (この辺からわからんw)
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 ### 呼び出し元プロセスで`exit()`
 
-## `System V init`でデーモンを起動
+## `System V init`でデーモン
 以上
 
+## `System V init`でデーモン
 ちょっと強引すぎやしませんかね……
 
 (小並感)
-
-## `System V init`でデーモンを起動
-
-終了ってどうすんの?
-
-→各プログラムに任せる
-
-そもそも、initの本来の仕事でなかったりする
 
 ## `systemd`先生登場
 
@@ -312,10 +366,62 @@ BSD initより柔軟
 - `stdin`を`/dev/null`に接続
 - `stdout` `stderr` を`systemd-journald.service`につなぐ
 
-## `systemd`先生登場
+## ユニット
 
-デーモンの終了も面倒を見てくれる[^systemd_for_admin_2]
+脱・シェルスクリプト
 
-←cgroupを利用
+→ユニットファイルとして諸々の設定を記述・管理
 
-[^systemd_for_admin_2]: http://popopopoon.hatenadiary.jp/entry/2017/11/19/005612
+- .service
+- .target
+- .socket
+
+...etc
+
+## ユニット
+
+```
+$ cat /lib/systemd/system/ssh.service
+...
+[Unit]
+Description=OpenBSD Secure Shell server
+After=network.target auditd.service
+ConditionPathExists=!/etc/ssh/sshd_not_to_be_run
+
+[Service]
+EnvironmentFile=-/etc/default/ssh
+ExecStartPre=/usr/sbin/sshd -t
+ExecStart=/usr/sbin/sshd -D $SSHD_OPTS
+ExecReload=/usr/sbin/sshd -t
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+Type=notify
+RuntimeDirectory=sshd
+RuntimeDirectoryMode=0755
+
+[Install]
+WantedBy=multi-user.target
+Alias=sshd.service
+```
+
+## デーモンの起動
+
+デーモンの起動方法が選べる
+
+- ブート時
+- ソケットベース
+- バスベース
+- デバイスベース
+- パスベース
+- タイマーベース
+
+## ユニットの依存関係
+
+```
+systemctl list-dependencies graphical.target
+...
+(ずらー)
+```
+[bootup(7)](https://www.freedesktop.org/software/systemd/man/bootup.html)
