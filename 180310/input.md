@@ -173,6 +173,7 @@ UNIXでは「既存プロセスの環境をまるごとコピーする」とい�
 これにより「新規プロセスは既存プロセスの子プロセスとして生成されるため、親プロセスなしで新規プロセスを生成することはできない」という制約が生まれる[^unix_mag]
 
 [^unix_mag]: 「次世代のプロセス管理デーモン 進化するinit」UNIX magazine 2009年1月号。
+
 ## `init`とは
 
 ### すべてのプロセスの親である
@@ -257,11 +258,6 @@ BSD initより柔軟
 - systemdは起動のさせ方も柔軟だよ
 
 ## デーモンづくり
-
-## `System V init`でデーモン
-元ネタはsystemd man pageのdaemon[^man_daemon]
-
-[^man_daemon]: https://www.freedesktop.org/software/systemd/man/daemon.html
 
 ## `System V init`でデーモン
 
@@ -425,3 +421,9 @@ systemctl list-dependencies graphical.target
 (ずらー)
 ```
 [bootup(7)](https://www.freedesktop.org/software/systemd/man/bootup.html)
+
+# 終了!
+
+## 多分話しすぎているはず!w
+
+- 質問・雑談タイム
