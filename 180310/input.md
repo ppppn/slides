@@ -69,6 +69,8 @@ nohup /path/to/your/daemon &
 
 じゃあ、initって何なのさ?
 
+# `init`
+
 ## PID = 1
 
 initはPID(プロセス)が1のプロセスである
@@ -257,7 +259,7 @@ BSD initより柔軟
 - systemdは終了も面倒をみるよ
 - systemdは起動のさせ方も柔軟だよ
 
-## デーモンづくり
+# デーモンづくり
 
 ## `System V init`でデーモン
 
