@@ -116,7 +116,7 @@ linux [...] init=/bin/bash
 1. ブートストラップローダ―がカーネルを起動させる
 1. initramfs(「ミニルート」)をメモリ上に展開する[^weekly_recipe_0348]
 
-[^weekly_recipe_0348]: http://gihyo.jp/admin/serial/01/ubuntu-recipe/0384gg
+[^weekly_recipe_0348]: http://gihyo.jp/admin/serial/01/ubuntu-recipe/0384
 
 ## ざっくり版`Linux`の起動(続き)
 5. 各種カーネルモジュール(デバイスドライバ)をロードする
